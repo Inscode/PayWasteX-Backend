@@ -1,6 +1,6 @@
 package com.paywastex.repository;
 
-import com.paywastex.entity.OurUsers;
+import com.paywastex.entity.auth.OurUsers;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,5 +16,10 @@ public interface OurUsersRepo extends JpaRepository<OurUsers, Integer> {
     boolean existsByEmail(String email);
 
     List<OurUsers> findAllByAccountNonLockedFalseAndLockTimeIsNotNull();
+
+    List<OurUsers> findAll();
+    void deleteById(Integer id);
+
+    long countByAccountNonLockedTrueAndRole(String role);
 }
 

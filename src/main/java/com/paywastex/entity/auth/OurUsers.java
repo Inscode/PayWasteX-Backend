@@ -1,12 +1,12 @@
-package com.paywastex.entity;
+package com.paywastex.entity.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.paywastex.entity.customer.Customer;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.paywastex.enums.Role;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -26,9 +26,8 @@ public class OurUsers implements UserDetails {
     @Column(name = "id", updatable = false, nullable = false)
     private int id;  // Auto-generated id
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @Column(length = 255, nullable = false)
+    private String role;  // No longer part of the primary key
 
     @Column(  length = 255)
     private String fullName;
@@ -51,12 +50,6 @@ public class OurUsers implements UserDetails {
     @Column(  columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
-
-    @Column
-    private String gender;
-
-    @Column
-    private Date dob;
 
     @Column(nullable = false)
     private boolean accountNonLocked = true;
@@ -92,7 +85,7 @@ public class OurUsers implements UserDetails {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority(role));
     }
 
     @Override
@@ -108,7 +101,7 @@ public class OurUsers implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return this.accountNonLocked;
     }
 
     @Override
@@ -124,6 +117,13 @@ public class OurUsers implements UserDetails {
     public String getPassword() {
         return password;
     }
+
+    // In your OurUsers entity
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> refreshTokens;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Customer customer;
 
 
 }
